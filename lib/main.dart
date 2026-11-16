@@ -26,6 +26,8 @@ import 'presentation/study_room/study_room_provider.dart';
 import 'data/repositories/study_room_repository.dart';
 import 'presentation/flashcards/flashcard_provider.dart';
 import 'data/repositories/flashcard_repository.dart';
+import 'presentation/cafeteria/cafeteria_provider.dart';
+import 'data/repositories/cafeteria_repository.dart';
 import 'presentation/splash/splash_view.dart';
 
 void main() {
@@ -105,6 +107,10 @@ class CityzensApp extends StatelessWidget {
         ChangeNotifierProvider<FlashcardProvider>(
           create: (_) =>
               FlashcardProvider(repository: sl<FlashcardRepository>()),
+        ),
+        ChangeNotifierProvider<CafeteriaProvider>(
+          create: (_) =>
+              CafeteriaProvider(repository: sl<CafeteriaRepository>()),
         ),
       ],
       child: Consumer<ThemeProvider>(

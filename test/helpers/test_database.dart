@@ -216,6 +216,59 @@ Future<AppDatabase> createTestDatabase() async {
         )
       ''');
 
+      await db.execute('''
+        CREATE TABLE cafeteria_menu_items (
+          id TEXT PRIMARY KEY,
+          name TEXT NOT NULL,
+          description TEXT NOT NULL,
+          category TEXT NOT NULL,
+          price REAL NOT NULL,
+          calories INTEGER NOT NULL,
+          protein_g REAL NOT NULL,
+          carbs_g REAL NOT NULL,
+          fat_g REAL NOT NULL,
+          dietary_tags TEXT NOT NULL,
+          dining_hall TEXT NOT NULL,
+          operational_hours TEXT NOT NULL,
+          is_available INTEGER NOT NULL DEFAULT 1,
+          image_asset TEXT NOT NULL
+        )
+      ''');
+
+      await db.execute('''
+        CREATE TABLE student_wallets (
+          student_id TEXT PRIMARY KEY,
+          balance REAL NOT NULL DEFAULT 150.0,
+          reward_points INTEGER NOT NULL DEFAULT 320,
+          last_reloaded_at INTEGER NOT NULL
+        )
+      ''');
+
+      await db.execute('''
+        CREATE TABLE cafeteria_orders (
+          id TEXT PRIMARY KEY,
+          order_number TEXT NOT NULL,
+          student_id TEXT NOT NULL,
+          student_name TEXT NOT NULL,
+          dining_hall TEXT NOT NULL,
+          items_json TEXT NOT NULL,
+          subtotal REAL NOT NULL,
+          discount REAL NOT NULL DEFAULT 0.0,
+          final_amount REAL NOT NULL,
+          total_calories INTEGER NOT NULL,
+          total_protein_g REAL NOT NULL,
+          total_carbs_g REAL NOT NULL,
+          total_fat_g REAL NOT NULL,
+          allergy_flags TEXT NOT NULL,
+          special_instructions TEXT NOT NULL,
+          status TEXT NOT NULL,
+          pickup_time TEXT NOT NULL,
+          payment_method TEXT NOT NULL,
+          nfc_token TEXT NOT NULL,
+          created_at INTEGER NOT NULL
+        )
+      ''');
+
       // Seed core test course
       await db.insert('courses', {
         'id': 'crs_01',
@@ -738,6 +791,141 @@ Future<AppDatabase> createTestDatabase() async {
       for (final r in reviews) {
         await db.insert('flashcard_reviews', r);
       }
+
+      // Seed Student Wallet for Safeer Hussain
+      await db.insert('student_wallets', {
+        'student_id': 'CTZ-2026-8842',
+        'balance': 150.00,
+        'reward_points': 320,
+        'last_reloaded_at': now
+            .subtract(const Duration(days: 3))
+            .millisecondsSinceEpoch,
+      });
+
+      // Seed Cafeteria Menu Items
+      final menuItems = [
+        {
+          'id': 'meal_tb_01',
+          'name': 'Turing High-Protein Quinoa Bowl',
+          'description': 'Warm organic quinoa, roasted chickpeas, avocado, baby spinach, and grilled tofu.',
+          'category': 'Bowls',
+          'price': 9.50,
+          'calories': 580,
+          'protein_g': 34.0,
+          'carbs_g': 62.0,
+          'fat_g': 18.0,
+          'dietary_tags': jsonEncode([
+            'Vegetarian',
+            'Gluten-Free',
+            'Halal',
+            'High-Protein',
+          ]),
+          'dining_hall': 'Turing Bistro',
+          'operational_hours': '07:30 - 20:00',
+          'is_available': 1,
+          'image_asset': 'assets/images/meal_quinoa_bowl.png',
+        },
+        {
+          'id': 'meal_tb_02',
+          'name': 'Alan Turing Sunrise Power Burrito',
+          'description': 'Scrambled egg whites, black beans, Monterey Jack, and seasoned lean turkey.',
+          'category': 'Breakfast',
+          'price': 7.25,
+          'calories': 490,
+          'protein_g': 28.0,
+          'carbs_g': 45.0,
+          'fat_g': 16.0,
+          'dietary_tags': jsonEncode(['Halal', 'High-Protein']),
+          'dining_hall': 'Turing Bistro',
+          'operational_hours': '07:30 - 11:30',
+          'is_available': 1,
+          'image_asset': 'assets/images/meal_burrito.png',
+        },
+        {
+          'id': 'meal_ht_01',
+          'name': 'Hopper Mediterranean Chicken Wrap',
+          'description': 'Flame-seared chicken breast, crisp cucumbers, pickled red onions, tzatziki.',
+          'category': 'Lunch',
+          'price': 8.50,
+          'calories': 520,
+          'protein_g': 38.0,
+          'carbs_g': 48.0,
+          'fat_g': 14.0,
+          'dietary_tags': jsonEncode(['Halal', 'High-Protein']),
+          'dining_hall': 'Hopper Tech Eatery',
+          'operational_hours': '10:00 - 19:30',
+          'is_available': 1,
+          'image_asset': 'assets/images/meal_chicken_wrap.png',
+        },
+        {
+          'id': 'meal_lc_01',
+          'name': 'Lovelace Sourdough Avocado Poached Eggs',
+          'description': 'Artisan sourdough toast, smashed avocados, two poached eggs, micro-greens.',
+          'category': 'Breakfast',
+          'price': 7.75,
+          'calories': 410,
+          'protein_g': 19.0,
+          'carbs_g': 38.0,
+          'fat_g': 18.0,
+          'dietary_tags': jsonEncode(['Vegetarian', 'High-Protein']),
+          'dining_hall': 'Lovelace Cafe',
+          'operational_hours': '08:00 - 18:00',
+          'is_available': 1,
+          'image_asset': 'assets/images/meal_avocado_toast.png',
+        },
+        {
+          'id': 'meal_lc_02',
+          'name': 'Ceremonial Matcha Oat Milk Latte',
+          'description': 'Uji green tea whisked with steamed barista oat milk.',
+          'category': 'Beverages',
+          'price': 5.25,
+          'calories': 140,
+          'protein_g': 4.0,
+          'carbs_g': 22.0,
+          'fat_g': 3.5,
+          'dietary_tags': jsonEncode(['Vegan', 'Vegetarian', 'Dairy-Free']),
+          'dining_hall': 'Lovelace Cafe',
+          'operational_hours': '08:00 - 18:00',
+          'is_available': 1,
+          'image_asset': 'assets/images/meal_matcha_latte.png',
+        },
+      ];
+
+      for (final m in menuItems) {
+        await db.insert('cafeteria_menu_items', m);
+      }
+
+      // Seed Cafeteria Initial Order
+      await db.insert('cafeteria_orders', {
+        'id': 'ord_init_01',
+        'order_number': 'ORD-8842-101',
+        'student_id': 'CTZ-2026-8842',
+        'student_name': 'Safeer Hussain',
+        'dining_hall': 'Turing Bistro',
+        'items_json': jsonEncode([
+          {
+            'item': menuItems[0],
+            'quantity': 1,
+            'special_instructions': 'Extra tahini dressing on side',
+          },
+        ]),
+        'subtotal': 9.50,
+        'discount': 0.0,
+        'final_amount': 9.50,
+        'total_calories': 580,
+        'total_protein_g': 34.0,
+        'total_carbs_g': 62.0,
+        'total_fat_g': 18.0,
+        'allergy_flags': jsonEncode(['Gluten-Free']),
+        'special_instructions': 'Pack in recyclable containers',
+        'status': 'ready',
+        'pickup_time': '12:30 PM',
+        'payment_method': 'Meal Credits Debit',
+        'nfc_token': 'NFC-TX-8842-99A1F4C2',
+        'created_at': now
+            .subtract(const Duration(hours: 3))
+            .millisecondsSinceEpoch,
+      });
     },
   );
 

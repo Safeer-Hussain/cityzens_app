@@ -29,7 +29,7 @@ This backlog defines 25 granular, production-ready engineering sprints. Promptin
   - Category decks for Algorithms, Distributed Systems, and Mobile Architecture.
   - Full-width analytics chart displaying card retention performance.
 
-- [ ] **Sprint 06: Campus Cafeteria Smart Meal Credits & Pre-Order Hub**
+- [x] **Sprint 06: Campus Cafeteria Smart Meal Credits & Pre-Order Hub**
   - Menu catalog with macronutrient data and campus dining hall operational hours.
   - Digital wallet debit balance ledger in SQLite with simulated NFC tap receipt.
   - Form validation for dietary allergy flags.
