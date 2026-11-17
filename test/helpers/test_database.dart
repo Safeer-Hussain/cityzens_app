@@ -269,6 +269,58 @@ Future<AppDatabase> createTestDatabase() async {
         )
       ''');
 
+      await db.execute('''
+        CREATE TABLE parking_zones (
+          id TEXT PRIMARY KEY,
+          name TEXT NOT NULL,
+          campus_area TEXT NOT NULL,
+          total_spots INTEGER NOT NULL,
+          occupied_spots INTEGER NOT NULL,
+          total_ev_spots INTEGER NOT NULL,
+          occupied_ev_spots INTEGER NOT NULL,
+          hourly_rate REAL NOT NULL,
+          operational_hours TEXT NOT NULL,
+          is_covered INTEGER NOT NULL,
+          charger_types TEXT NOT NULL
+        )
+      ''');
+
+      await db.execute('''
+        CREATE TABLE parking_permits (
+          id TEXT PRIMARY KEY,
+          student_id TEXT NOT NULL,
+          student_name TEXT NOT NULL,
+          vehicle_plate TEXT NOT NULL,
+          vehicle_model TEXT NOT NULL,
+          permit_tier TEXT NOT NULL,
+          valid_from INTEGER NOT NULL,
+          valid_until INTEGER NOT NULL,
+          is_active INTEGER NOT NULL DEFAULT 1,
+          assigned_zone TEXT NOT NULL,
+          rfid_token TEXT NOT NULL,
+          barcode_payload TEXT NOT NULL
+        )
+      ''');
+
+      await db.execute('''
+        CREATE TABLE ev_charging_reservations (
+          id TEXT PRIMARY KEY,
+          student_id TEXT NOT NULL,
+          student_name TEXT NOT NULL,
+          zone_id TEXT NOT NULL,
+          zone_name TEXT NOT NULL,
+          station_id TEXT NOT NULL,
+          charger_type TEXT NOT NULL,
+          slot_time TEXT NOT NULL,
+          target_battery_percent INTEGER NOT NULL,
+          estimated_energy_kwh REAL NOT NULL,
+          cost_credits REAL NOT NULL,
+          queue_token TEXT NOT NULL,
+          status TEXT NOT NULL,
+          created_at INTEGER NOT NULL
+        )
+      ''');
+
       // Seed core test course
       await db.insert('courses', {
         'id': 'crs_01',
@@ -924,6 +976,99 @@ Future<AppDatabase> createTestDatabase() async {
         'nfc_token': 'NFC-TX-8842-99A1F4C2',
         'created_at': now
             .subtract(const Duration(hours: 3))
+            .millisecondsSinceEpoch,
+      });
+
+      // Seed Parking Zones
+      final zones = [
+        {
+          'id': 'zone_north_deck',
+          'name': 'North Structure Multilevel Deck',
+          'campus_area': 'North Gate / Engineering Complex',
+          'total_spots': 260,
+          'occupied_spots': 185,
+          'total_ev_spots': 24,
+          'occupied_ev_spots': 16,
+          'hourly_rate': 1.50,
+          'operational_hours': '06:00 - 23:00',
+          'is_covered': 1,
+          'charger_types': jsonEncode([
+            'DC Fast 50kW (CCS)',
+            'Level 2 7.2kW (J1772)',
+          ]),
+        },
+        {
+          'id': 'zone_south_lot',
+          'name': 'South STEM Surface Lot',
+          'campus_area': 'South Quad / Natural Sciences',
+          'total_spots': 180,
+          'occupied_spots': 142,
+          'total_ev_spots': 12,
+          'occupied_ev_spots': 10,
+          'hourly_rate': 1.00,
+          'operational_hours': '07:00 - 22:00',
+          'is_covered': 0,
+          'charger_types': jsonEncode(['Level 2 7.2kW (J1772)']),
+        },
+        {
+          'id': 'zone_ev_plaza',
+          'name': 'Innovation Hub EV Supercharging Plaza',
+          'campus_area': 'West Campus / Research Center',
+          'total_spots': 48,
+          'occupied_spots': 31,
+          'total_ev_spots': 48,
+          'occupied_ev_spots': 31,
+          'hourly_rate': 2.25,
+          'operational_hours': '24 Hours Open',
+          'is_covered': 1,
+          'charger_types': jsonEncode([
+            'Tesla NACS / CCS 150kW',
+            'DC Fast 50kW (CCS)',
+          ]),
+        },
+      ];
+
+      for (final z in zones) {
+        await db.insert('parking_zones', z);
+      }
+
+      // Seed Student Parking Permit
+      await db.insert('parking_permits', {
+        'id': 'pmt_8842_01',
+        'student_id': 'CTZ-2026-8842',
+        'student_name': 'Safeer Hussain',
+        'vehicle_plate': 'ABC-8842',
+        'vehicle_model': 'Tesla Model 3 / Pearl White',
+        'permit_tier': 'EV All-Access Pass',
+        'valid_from': now
+            .subtract(const Duration(days: 30))
+            .millisecondsSinceEpoch,
+        'valid_until': now
+            .add(const Duration(days: 120))
+            .millisecondsSinceEpoch,
+        'is_active': 1,
+        'assigned_zone': 'All Campus Lots',
+        'rfid_token': 'RFID-PK-8842-E93B17C8',
+        'barcode_payload': 'CTZ-PRK-8842-ABC8842',
+      });
+
+      // Seed Initial EV Charging Reservation
+      await db.insert('ev_charging_reservations', {
+        'id': 'ev_res_init_01',
+        'student_id': 'CTZ-2026-8842',
+        'student_name': 'Safeer Hussain',
+        'zone_id': 'zone_north_deck',
+        'zone_name': 'North Structure Multilevel Deck',
+        'station_id': 'ST-04',
+        'charger_type': 'DC Fast 50kW (CCS)',
+        'slot_time': '14:30 - 15:30',
+        'target_battery_percent': 85,
+        'estimated_energy_kwh': 32.5,
+        'cost_credits': 4.50,
+        'queue_token': 'EV-QUEUE-#04',
+        'status': 'confirmed',
+        'created_at': now
+            .subtract(const Duration(hours: 1))
             .millisecondsSinceEpoch,
       });
     },

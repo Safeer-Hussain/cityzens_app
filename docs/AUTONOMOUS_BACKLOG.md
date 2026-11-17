@@ -34,7 +34,7 @@ This backlog defines 25 granular, production-ready engineering sprints. Promptin
   - Digital wallet debit balance ledger in SQLite with simulated NFC tap receipt.
   - Form validation for dietary allergy flags.
 
-- [ ] **Sprint 07: Student Parking Permit & EV Charging Radar**
+- [x] **Sprint 07: Student Parking Permit & EV Charging Radar**
   - Live occupancy gauge for North and South student parking structures.
   - EV charger status monitoring and queue reservation slot tokens.
   - Native camera license plate scanner OCR mode bridge.

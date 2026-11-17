@@ -28,6 +28,8 @@ import 'presentation/flashcards/flashcard_provider.dart';
 import 'data/repositories/flashcard_repository.dart';
 import 'presentation/cafeteria/cafeteria_provider.dart';
 import 'data/repositories/cafeteria_repository.dart';
+import 'presentation/parking/parking_provider.dart';
+import 'data/repositories/parking_repository.dart';
 import 'presentation/splash/splash_view.dart';
 
 void main() {
@@ -111,6 +113,9 @@ class CityzensApp extends StatelessWidget {
         ChangeNotifierProvider<CafeteriaProvider>(
           create: (_) =>
               CafeteriaProvider(repository: sl<CafeteriaRepository>()),
+        ),
+        ChangeNotifierProvider<ParkingProvider>(
+          create: (_) => ParkingProvider(repository: sl<ParkingRepository>()),
         ),
       ],
       child: Consumer<ThemeProvider>(
