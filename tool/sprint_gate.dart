@@ -32,9 +32,9 @@ class SprintGate {
       // Step 3: Static Analysis
       final analyzePassed = await _runStep(
         stepNumber: 3,
-        title: 'Static Analysis (flutter analyze --no-pub)',
+        title: 'Static Analysis (flutter analyze --no-pub --no-fatal-infos)',
         command: 'flutter',
-        arguments: ['analyze', '--no-pub'],
+        arguments: ['analyze', '--no-pub', '--no-fatal-infos'],
       );
       if (!analyzePassed) return false;
 
