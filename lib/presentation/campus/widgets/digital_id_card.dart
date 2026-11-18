@@ -6,6 +6,7 @@ import '../../study_room/study_room_booking_view.dart';
 import '../../flashcards/flashcard_deck_builder_view.dart';
 import '../../cafeteria/cafeteria_hub_view.dart';
 import '../../parking/parking_radar_view.dart';
+import '../../timetable/timetable_resolver_view.dart';
 
 class DigitalIdCard extends StatelessWidget {
   final VoidCallback? onLongPressVersion;
@@ -457,6 +458,49 @@ class DigitalIdCard extends StatelessWidget {
                           'Student Parking Permit & EV Charging Radar',
                           style: TextStyle(
                             color: colors.secondary,
+                            fontSize: 11,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 6),
+                // Quick Access 7: Academic Timetable Conflict Resolver
+                InkWell(
+                  onTap: () {
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (_) => const TimetableResolverView(),
+                      ),
+                    );
+                  },
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 6,
+                    ),
+                    decoration: BoxDecoration(
+                      color: colors.primary.withValues(alpha: 0.12),
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(
+                        color: colors.primary.withValues(alpha: 0.3),
+                      ),
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
+                          Icons.schedule_rounded,
+                          size: 14,
+                          color: colors.primary,
+                        ),
+                        const SizedBox(width: 6),
+                        Text(
+                          'Academic Timetable & Conflict Resolver',
+                          style: TextStyle(
+                            color: colors.primary,
                             fontSize: 11,
                             fontWeight: FontWeight.w700,
                           ),

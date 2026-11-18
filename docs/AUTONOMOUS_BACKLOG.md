@@ -39,7 +39,7 @@ This backlog defines 25 granular, production-ready engineering sprints. Promptin
   - EV charger status monitoring and queue reservation slot tokens.
   - Native camera license plate scanner OCR mode bridge.
 
-- [ ] **Sprint 08: Academic Timetable Conflict Resolver**
+- [x] **Sprint 08: Academic Timetable Conflict Resolver**
   - Automated detection of overlapping course schedules and laboratory blocks.
   - Smart heuristic suggestions for alternative lecture sections.
   - Interactive weekly schedule grid supporting landscape master-detail view.

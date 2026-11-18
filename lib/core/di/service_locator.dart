@@ -16,6 +16,7 @@ import '../../data/repositories/study_room_repository.dart';
 import '../../data/repositories/flashcard_repository.dart';
 import '../../data/repositories/cafeteria_repository.dart';
 import '../../data/repositories/parking_repository.dart';
+import '../../data/repositories/timetable_repository.dart';
 
 final GetIt sl = GetIt.instance;
 
@@ -67,4 +68,5 @@ Future<void> setupServiceLocator({
   sl.registerSingleton<FlashcardRepository>(FlashcardRepository(database: db));
   sl.registerSingleton<CafeteriaRepository>(CafeteriaRepository(database: db));
   sl.registerSingleton<ParkingRepository>(ParkingRepository(database: db));
+  sl.registerSingleton<TimetableRepository>(TimetableRepository(database: db));
 }

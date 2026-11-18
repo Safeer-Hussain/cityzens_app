@@ -2,7 +2,7 @@ name: cityzens_app
 description: "Cityzens: Production-grade Smart Campus, Digital Library Records, Automated Attendance Tracking, Native Camera Scanner, and AI Academic Ecosystem."
 publish_to: 'none'
 
-version: 1.0.0+1
+version: 1.0.1+2
 
 environment:
   sdk: ^3.13.7

@@ -321,6 +321,23 @@ Future<AppDatabase> createTestDatabase() async {
         )
       ''');
 
+      await db.execute('''
+        CREATE TABLE timetable_slots (
+          id TEXT PRIMARY KEY,
+          course_id TEXT NOT NULL,
+          course_code TEXT NOT NULL,
+          course_title TEXT NOT NULL,
+          section_name TEXT NOT NULL,
+          instructor TEXT NOT NULL,
+          room TEXT NOT NULL,
+          day_of_week INTEGER NOT NULL,
+          start_time_minutes INTEGER NOT NULL,
+          end_time_minutes INTEGER NOT NULL,
+          is_lab INTEGER NOT NULL DEFAULT 0,
+          is_enrolled INTEGER NOT NULL DEFAULT 0
+        )
+      ''');
+
       // Seed core test course
       await db.insert('courses', {
         'id': 'crs_01',
@@ -1071,6 +1088,132 @@ Future<AppDatabase> createTestDatabase() async {
             .subtract(const Duration(hours: 1))
             .millisecondsSinceEpoch,
       });
+
+      // Seed Timetable Slots
+      final slots = [
+        // CS-401 (Enrolled: Mon & Wed 09:00 - 10:30)
+        {
+          'id': 'slot_cs401_sec_a_mon',
+          'course_id': 'crs_01',
+          'course_code': 'CS-401',
+          'course_title': 'Distributed Systems & Cloud Computing',
+          'section_name': 'Section A',
+          'instructor': 'Dr. Aris Thorne',
+          'room': 'Alan Turing Hall 302',
+          'day_of_week': 1,
+          'start_time_minutes': 540,
+          'end_time_minutes': 630,
+          'is_lab': 0,
+          'is_enrolled': 1,
+        },
+        {
+          'id': 'slot_cs401_sec_a_wed',
+          'course_id': 'crs_01',
+          'course_code': 'CS-401',
+          'course_title': 'Distributed Systems & Cloud Computing',
+          'section_name': 'Section A',
+          'instructor': 'Dr. Aris Thorne',
+          'room': 'Alan Turing Hall 302',
+          'day_of_week': 3,
+          'start_time_minutes': 540,
+          'end_time_minutes': 630,
+          'is_lab': 0,
+          'is_enrolled': 1,
+        },
+        // CS-401 Alternative
+        {
+          'id': 'slot_cs401_sec_b_tue',
+          'course_id': 'crs_01',
+          'course_code': 'CS-401',
+          'course_title': 'Distributed Systems & Cloud Computing',
+          'section_name': 'Section B (Afternoon)',
+          'instructor': 'Dr. Aris Thorne',
+          'room': 'Alan Turing Hall 302',
+          'day_of_week': 2,
+          'start_time_minutes': 840,
+          'end_time_minutes': 930,
+          'is_lab': 0,
+          'is_enrolled': 0,
+        },
+        // CS-405 (Enrolled: Tue & Thu 11:00 - 12:30 + Fri Lab)
+        {
+          'id': 'slot_cs405_sec_a_tue',
+          'course_id': 'crs_02',
+          'course_code': 'CS-405',
+          'course_title': 'Advanced Mobile Architecture',
+          'section_name': 'Section A',
+          'instructor': 'Prof. Evelyn Vance',
+          'room': 'Grace Hopper Hall 101',
+          'day_of_week': 2,
+          'start_time_minutes': 660,
+          'end_time_minutes': 750,
+          'is_lab': 0,
+          'is_enrolled': 1,
+        },
+        {
+          'id': 'slot_cs405_lab_a_fri',
+          'course_id': 'crs_02',
+          'course_code': 'CS-405',
+          'course_title': 'Advanced Mobile Architecture Lab',
+          'section_name': 'Lab Bay A1',
+          'instructor': 'Dr. Marcus Brody',
+          'room': 'Engineering Lab 4B',
+          'day_of_week': 5,
+          'start_time_minutes': 600,
+          'end_time_minutes': 720,
+          'is_lab': 1,
+          'is_enrolled': 1,
+        },
+        // SE-420 (Enrolled: Wed 09:30 - 11:00 -> Conflicts with CS-401 on Wed 09:00 - 10:30)
+        {
+          'id': 'slot_se420_sec_a_wed',
+          'course_id': 'crs_04',
+          'course_code': 'SE-420',
+          'course_title': 'Formal Methods & Verification',
+          'section_name': 'Section A',
+          'instructor': 'Dr. Donald Knuth',
+          'room': 'Shannon Tower 404',
+          'day_of_week': 3,
+          'start_time_minutes': 570,
+          'end_time_minutes': 660,
+          'is_lab': 0,
+          'is_enrolled': 1,
+        },
+        // SE-420 Alternative
+        {
+          'id': 'slot_se420_sec_b_wed',
+          'course_id': 'crs_04',
+          'course_code': 'SE-420',
+          'course_title': 'Formal Methods & Verification',
+          'section_name': 'Section B (Afternoon)',
+          'instructor': 'Dr. Donald Knuth',
+          'room': 'Shannon Tower 404',
+          'day_of_week': 3,
+          'start_time_minutes': 840,
+          'end_time_minutes': 930,
+          'is_lab': 0,
+          'is_enrolled': 0,
+        },
+        // SEC-430 (Enrolled: Mon 11:30 - 13:00)
+        {
+          'id': 'slot_sec430_sec_a_mon',
+          'course_id': 'crs_05',
+          'course_code': 'SEC-430',
+          'course_title': 'Applied Cryptography & Zero-Knowledge Proofs',
+          'section_name': 'Section A',
+          'instructor': 'Prof. Adi Shamir',
+          'room': 'Lovelace Wing 201',
+          'day_of_week': 1,
+          'start_time_minutes': 690,
+          'end_time_minutes': 780,
+          'is_lab': 0,
+          'is_enrolled': 1,
+        },
+      ];
+
+      for (final s in slots) {
+        await db.insert('timetable_slots', s);
+      }
     },
   );
 

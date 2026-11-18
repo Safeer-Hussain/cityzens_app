@@ -245,6 +245,23 @@ class AppDatabase {
       )
     ''');
 
+    await _db!.execute('''
+      CREATE TABLE IF NOT EXISTS timetable_slots (
+        id TEXT PRIMARY KEY,
+        course_id TEXT NOT NULL,
+        course_code TEXT NOT NULL,
+        course_title TEXT NOT NULL,
+        section_name TEXT NOT NULL,
+        instructor TEXT NOT NULL,
+        room TEXT NOT NULL,
+        day_of_week INTEGER NOT NULL,
+        start_time_minutes INTEGER NOT NULL,
+        end_time_minutes INTEGER NOT NULL,
+        is_lab INTEGER NOT NULL DEFAULT 0,
+        is_enrolled INTEGER NOT NULL DEFAULT 0
+      )
+    ''');
+
     final transcriptCount =
         Sqflite.firstIntValue(
           await _db!.rawQuery('SELECT COUNT(*) FROM academic_transcripts'),
@@ -298,6 +315,15 @@ class AppDatabase {
         0;
     if (parkingZoneCount == 0) {
       await _seedParkingData(_db!);
+    }
+
+    final timetableSlotCount =
+        Sqflite.firstIntValue(
+          await _db!.rawQuery('SELECT COUNT(*) FROM timetable_slots'),
+        ) ??
+        0;
+    if (timetableSlotCount == 0) {
+      await _seedTimetableSlots(_db!);
     }
   }
 
@@ -604,6 +630,23 @@ class AppDatabase {
         queue_token TEXT NOT NULL,
         status TEXT NOT NULL,
         created_at INTEGER NOT NULL
+      )
+    ''');
+
+    await db.execute('''
+      CREATE TABLE timetable_slots (
+        id TEXT PRIMARY KEY,
+        course_id TEXT NOT NULL,
+        course_code TEXT NOT NULL,
+        course_title TEXT NOT NULL,
+        section_name TEXT NOT NULL,
+        instructor TEXT NOT NULL,
+        room TEXT NOT NULL,
+        day_of_week INTEGER NOT NULL,
+        start_time_minutes INTEGER NOT NULL,
+        end_time_minutes INTEGER NOT NULL,
+        is_lab INTEGER NOT NULL DEFAULT 0,
+        is_enrolled INTEGER NOT NULL DEFAULT 0
       )
     ''');
   }
@@ -928,6 +971,9 @@ class AppDatabase {
 
     // 11. Seed Parking Zones, Permits & EV Reservations
     await _seedParkingData(db);
+
+    // 12. Seed Academic Timetable Slots & Conflict Scenarios
+    await _seedTimetableSlots(db);
   }
 
   static Future<void> _seedTranscripts(Database db) async {
@@ -2373,5 +2419,207 @@ class AppDatabase {
           .subtract(const Duration(hours: 1))
           .millisecondsSinceEpoch,
     });
+  }
+
+  static Future<void> _seedTimetableSlots(Database db) async {
+    final slots = [
+      // 1. CS-401 (Enrolled Section A: Mon & Wed 09:00 - 10:30)
+      {
+        'id': 'slot_cs401_sec_a_mon',
+        'course_id': 'crs_01',
+        'course_code': 'CS-401',
+        'course_title': 'Distributed Systems & Cloud Computing',
+        'section_name': 'Section A',
+        'instructor': 'Dr. Aris Thorne',
+        'room': 'Alan Turing Hall 302',
+        'day_of_week': 1, // Mon
+        'start_time_minutes': 540, // 09:00
+        'end_time_minutes': 630, // 10:30
+        'is_lab': 0,
+        'is_enrolled': 1,
+      },
+      {
+        'id': 'slot_cs401_sec_a_wed',
+        'course_id': 'crs_01',
+        'course_code': 'CS-401',
+        'course_title': 'Distributed Systems & Cloud Computing',
+        'section_name': 'Section A',
+        'instructor': 'Dr. Aris Thorne',
+        'room': 'Alan Turing Hall 302',
+        'day_of_week': 3, // Wed
+        'start_time_minutes': 540, // 09:00
+        'end_time_minutes': 630, // 10:30
+        'is_lab': 0,
+        'is_enrolled': 1,
+      },
+      // CS-401 Alternative (Section B: Tue & Thu 14:00 - 15:30)
+      {
+        'id': 'slot_cs401_sec_b_tue',
+        'course_id': 'crs_01',
+        'course_code': 'CS-401',
+        'course_title': 'Distributed Systems & Cloud Computing',
+        'section_name': 'Section B (Afternoon)',
+        'instructor': 'Dr. Aris Thorne',
+        'room': 'Alan Turing Hall 302',
+        'day_of_week': 2, // Tue
+        'start_time_minutes': 840, // 14:00
+        'end_time_minutes': 930, // 15:30
+        'is_lab': 0,
+        'is_enrolled': 0,
+      },
+      {
+        'id': 'slot_cs401_sec_b_thu',
+        'course_id': 'crs_01',
+        'course_code': 'CS-401',
+        'course_title': 'Distributed Systems & Cloud Computing',
+        'section_name': 'Section B (Afternoon)',
+        'instructor': 'Dr. Aris Thorne',
+        'room': 'Alan Turing Hall 302',
+        'day_of_week': 4, // Thu
+        'start_time_minutes': 840, // 14:00
+        'end_time_minutes': 930, // 15:30
+        'is_lab': 0,
+        'is_enrolled': 0,
+      },
+
+      // 2. CS-405 (Enrolled Section A: Tue & Thu 11:00 - 12:30 + Fri Lab)
+      {
+        'id': 'slot_cs405_sec_a_tue',
+        'course_id': 'crs_02',
+        'course_code': 'CS-405',
+        'course_title': 'Advanced Mobile Architecture',
+        'section_name': 'Section A',
+        'instructor': 'Prof. Evelyn Vance',
+        'room': 'Grace Hopper Hall 101',
+        'day_of_week': 2, // Tue
+        'start_time_minutes': 660, // 11:00
+        'end_time_minutes': 750, // 12:30
+        'is_lab': 0,
+        'is_enrolled': 1,
+      },
+      {
+        'id': 'slot_cs405_sec_a_thu',
+        'course_id': 'crs_02',
+        'course_code': 'CS-405',
+        'course_title': 'Advanced Mobile Architecture',
+        'section_name': 'Section A',
+        'instructor': 'Prof. Evelyn Vance',
+        'room': 'Grace Hopper Hall 101',
+        'day_of_week': 4, // Thu
+        'start_time_minutes': 660, // 11:00
+        'end_time_minutes': 750, // 12:30
+        'is_lab': 0,
+        'is_enrolled': 1,
+      },
+      {
+        'id': 'slot_cs405_lab_a_fri',
+        'course_id': 'crs_02',
+        'course_code': 'CS-405',
+        'course_title': 'Advanced Mobile Architecture Lab',
+        'section_name': 'Lab Bay A1',
+        'instructor': 'Dr. Marcus Brody',
+        'room': 'Engineering Lab 4B',
+        'day_of_week': 5, // Fri
+        'start_time_minutes': 600, // 10:00
+        'end_time_minutes': 720, // 12:00
+        'is_lab': 1,
+        'is_enrolled': 1,
+      },
+
+      // 3. SE-420 (Enrolled Section A: Wed 09:30 - 11:00 -> CONFLICTS with CS-401 on Wed 09:00 - 10:30!)
+      {
+        'id': 'slot_se420_sec_a_wed',
+        'course_id': 'crs_04',
+        'course_code': 'SE-420',
+        'course_title': 'Formal Methods & Verification',
+        'section_name': 'Section A',
+        'instructor': 'Dr. Donald Knuth',
+        'room': 'Shannon Tower 404',
+        'day_of_week': 3, // Wed
+        'start_time_minutes': 570, // 09:30 (overlaps by 60 min)
+        'end_time_minutes': 660, // 11:00
+        'is_lab': 0,
+        'is_enrolled': 1,
+      },
+      // SE-420 Non-conflicting alternative (Section B: Wed 14:00 - 15:30)
+      {
+        'id': 'slot_se420_sec_b_wed',
+        'course_id': 'crs_04',
+        'course_code': 'SE-420',
+        'course_title': 'Formal Methods & Verification',
+        'section_name': 'Section B (Afternoon)',
+        'instructor': 'Dr. Donald Knuth',
+        'room': 'Shannon Tower 404',
+        'day_of_week': 3, // Wed
+        'start_time_minutes': 840, // 14:00
+        'end_time_minutes': 930, // 15:30
+        'is_lab': 0,
+        'is_enrolled': 0,
+      },
+
+      // 4. SEC-430 (Enrolled Section A: Mon & Wed 11:30 - 13:00)
+      {
+        'id': 'slot_sec430_sec_a_mon',
+        'course_id': 'crs_05',
+        'course_code': 'SEC-430',
+        'course_title': 'Applied Cryptography & Zero-Knowledge Proofs',
+        'section_name': 'Section A',
+        'instructor': 'Prof. Adi Shamir',
+        'room': 'Lovelace Wing 201',
+        'day_of_week': 1, // Mon
+        'start_time_minutes': 690, // 11:30
+        'end_time_minutes': 780, // 13:00
+        'is_lab': 0,
+        'is_enrolled': 1,
+      },
+      {
+        'id': 'slot_sec430_sec_a_wed',
+        'course_id': 'crs_05',
+        'course_code': 'SEC-430',
+        'course_title': 'Applied Cryptography & Zero-Knowledge Proofs',
+        'section_name': 'Section A',
+        'instructor': 'Prof. Adi Shamir',
+        'room': 'Lovelace Wing 201',
+        'day_of_week': 3, // Wed
+        'start_time_minutes': 690, // 11:30
+        'end_time_minutes': 780, // 13:00
+        'is_lab': 0,
+        'is_enrolled': 1,
+      },
+
+      // 5. CS-410 (Elective: Thu 09:00 - 10:30 & Fri Lab 14:00 - 16:00)
+      {
+        'id': 'slot_cs410_sec_a_thu',
+        'course_id': 'crs_06',
+        'course_code': 'CS-410',
+        'course_title': 'Autonomous Agents & Reinforcement Learning',
+        'section_name': 'Section A',
+        'instructor': 'Dr. Demis Hassabis',
+        'room': 'DeepMind Complex 101',
+        'day_of_week': 4, // Thu
+        'start_time_minutes': 540, // 09:00
+        'end_time_minutes': 630, // 10:30
+        'is_lab': 0,
+        'is_enrolled': 0,
+      },
+      {
+        'id': 'slot_cs410_lab_a_fri',
+        'course_id': 'crs_06',
+        'course_code': 'CS-410',
+        'course_title': 'Autonomous Agents Simulation Lab',
+        'section_name': 'Lab Bay B',
+        'instructor': 'Dr. Demis Hassabis',
+        'room': 'DeepMind Complex Lab 2',
+        'day_of_week': 5, // Fri
+        'start_time_minutes': 840, // 14:00
+        'end_time_minutes': 960, // 16:00
+        'is_lab': 1,
+        'is_enrolled': 0,
+      },
+    ];
+
+    for (final s in slots) {
+      await db.insert('timetable_slots', s);
+    }
   }
 }

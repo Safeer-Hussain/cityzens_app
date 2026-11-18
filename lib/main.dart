@@ -30,6 +30,8 @@ import 'presentation/cafeteria/cafeteria_provider.dart';
 import 'data/repositories/cafeteria_repository.dart';
 import 'presentation/parking/parking_provider.dart';
 import 'data/repositories/parking_repository.dart';
+import 'presentation/timetable/timetable_provider.dart';
+import 'data/repositories/timetable_repository.dart';
 import 'presentation/splash/splash_view.dart';
 
 void main() {
@@ -116,6 +118,10 @@ class CityzensApp extends StatelessWidget {
         ),
         ChangeNotifierProvider<ParkingProvider>(
           create: (_) => ParkingProvider(repository: sl<ParkingRepository>()),
+        ),
+        ChangeNotifierProvider<TimetableProvider>(
+          create: (_) =>
+              TimetableProvider(repository: sl<TimetableRepository>()),
         ),
       ],
       child: Consumer<ThemeProvider>(
